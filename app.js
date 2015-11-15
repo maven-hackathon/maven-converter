@@ -24,6 +24,12 @@ function do_convert() {
     }
 }
 
+function get_streetAddress(row) {
+    var addr = row['Address'];
+
+    return addr;
+}
+
 function get_content(row) {
     var content = row['Paragraph of Summary'];
 
@@ -59,6 +65,7 @@ function handle_gsheet(data, tabletop) {
     // cycle through GSheet & push to Parse
     $.each(data, function(ii, row) {
         var name = get_name(row);
+        var address = get_streetAddress(row);
         var latlon = get_latlon(row);
         var summary = get_summary(row);
         var content = get_content(row);
@@ -74,17 +81,19 @@ function handle_gsheet(data, tabletop) {
                     ? new MapLocation()
                     : results[0];
 
-                parse_add(loc, name, latlon, summary, content);
+                parse_add(loc, name, address, latlon, summary, content);
             }
         })
     });
 }
 
-function parse_add(obj, name, latlon, summary, content) {
+function parse_add(obj, name, address, latlon, summary, content) {
     obj.set('name', name);
     obj.set('summary', summary);
     obj.set('content', content);
+
     set_geo_point(obj, latlon);
+    set_streetAddress(obj, address);
     set_tags(obj);
 
     obj.save(null, {
@@ -108,6 +117,13 @@ function set_geo_point(obj, latlon) {
             lon = Number.parseFloat(latlon.longitude);
 
         obj.set('latlon', new Parse.GeoPoint(lat, lon));
+    }
+}
+
+// set street address if valid
+function set_streetAddress(obj, addr) {
+    if (addr) {
+        obj.set('streetAddress', addr);
     }
 }
 
