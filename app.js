@@ -52,31 +52,32 @@ function get_summary(row) {
 
 function handle_gsheet(data, tabletop) {
     // Map-Location
-    var MapLocation = Parse.Object.extend('MapLocation'),
-
-        row,
-        name,
-        latlon,
-        summary,
-        content,
-
-        loc;
+    var MapLocation = Parse.Object.extend('MapLocation');
 
     console.log(data);
 
     // cycle through GSheet & push to Parse
-    for (var ii = 0; ii < data.length; ii++) {
-        row = data[ii];
-
-        name = get_name(row);
-        latlon = get_latlon(row);
-        summary = get_summary(row);
-        content = get_content(row);
+    $.each(data, function(ii, row) {
+        var name = get_name(row);
+        var latlon = get_latlon(row);
+        var summary = get_summary(row);
+        var content = get_content(row);
 
         // compare names & either push or update Parse
-        loc = new MapLocation();        // Map-Location
-        parse_add(loc, name, latlon, summary, content);
-    }
+        var query = new Parse.Query(MapLocation);
+        query.equalTo('name', name);
+        query.find({
+            success: function(results) {
+                // if found, grab only the first result which may be a
+                // logic bug (but name should be unique)
+                var loc = (0 == results.length)
+                    ? new MapLocation()
+                    : results[0];
+
+                parse_add(loc, name, latlon, summary, content);
+            }
+        })
+    });
 }
 
 function parse_add(obj, name, latlon, summary, content) {
