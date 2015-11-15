@@ -92,6 +92,8 @@ function parse_add(obj, name, address, latlon, summary, content) {
     obj.set('summary', summary);
     obj.set('content', content);
 
+    obj.set('phoneNumber', '(415) 703-6150');
+
     set_geo_point(obj, latlon);
     set_streetAddress(obj, address);
     set_tags(obj);
@@ -99,7 +101,7 @@ function parse_add(obj, name, address, latlon, summary, content) {
     obj.save(null, {
         success: function(newLoc) {
             // Execute that should take place after the object is saved.
-            console.log('New Parse object:', newLoc);
+            console.log('Parse object saved:', newLoc);
         },
         error: function(newLoc, error) {
             // Execute any logic that should take place if the save fails.
